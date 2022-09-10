@@ -1,0 +1,21 @@
+{
+  "name": "phaser-template",
+  "version": "1.0.0",
+  "description": "A Phaser template project to use as a base for new Phaser projects.",
+  "main": "src/index.ts",
+  "repository": {
+    "url": "https://github.com/mjviljan/phaser-template.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "author": "Mika Viljanen",
+  "license": "MIT",
+  "devDependencies": {
+    "phaser": "^3.55.2",
+    "typescript": "^4.8.3",
+    "vite": "^3.1.0"
+  }
+}
