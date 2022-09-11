@@ -5,7 +5,6 @@ A template for new [Phaser](https://phaser.io) projects.
 To start using this as a base for your project, clone the repo and run:
 ```bash
 npm install
-npm run build
 npm run dev
 ```
 
