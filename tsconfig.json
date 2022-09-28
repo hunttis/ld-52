@@ -9,6 +9,8 @@
     },
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "target": "ES2021",
+    "outDir": "dist"
   },
   "include": ["src"]
 }
