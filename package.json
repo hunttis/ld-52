@@ -1,25 +1,25 @@
 {
-  "name": "phaser-template",
+  "name": "ld-52-game",
   "version": "1.0.0",
-  "description": "A Phaser template project to use as a base for new Phaser projects.",
+  "description": "A game made in Ludum Dare 52.",
   "main": "src/index.ts",
   "repository": {
-    "url": "https://github.com/mjviljan/phaser-template.git"
+    "url": "https://github.com/hunttis/ld-52.git"
   },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
-  "author": "Mika Viljanen",
+  "author": "Ville, Niclas, Hanna, Mikko, Ulf, Juuso",
   "license": "MIT",
   "devDependencies": {
-    "phaser": "^3.55.2",
-    "typescript": "^4.9.4",
-    "vite": "^4.0.4"
+    "phaser": "3.55.2",
+    "typescript": "4.9.4",
+    "vite": "4.0.4"
   },
   "dependencies": {
-    "easystarjs": "^0.4.4",
-    "prettier": "^2.8.1"
+    "easystarjs": "0.4.4",
+    "prettier": "2.8.1"
   }
 }

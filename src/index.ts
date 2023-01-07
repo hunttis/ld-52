@@ -2,7 +2,7 @@ import { GameScene } from "./scenes/gameScene";
 import { MenuScene } from "./scenes/menuScene";
 import "vite/types/importMeta.d"; // Not needed when not using TypeScript
 
-const hotReload = false;
+const hotReload = true;
 
 export function startGame() {
   const config: Phaser.Types.Core.GameConfig = {

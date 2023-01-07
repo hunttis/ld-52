@@ -40,9 +40,6 @@ export class LevelManager extends Phaser.GameObjects.Group {
     this.buildingLayer.setVisible(true);
 
     this.createMapSprites(map);
-
-    this.parentScene.physics.add.collider(this.parentScene.player, this.buildingLayer);
-
     this.configEasyStar();
   }
 
