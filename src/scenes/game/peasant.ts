@@ -15,7 +15,8 @@ enum PeasantState {
   HEAD_BACK_TO_PARTY,
 }
 
-type Path = { x: number; y: number }[];
+type Coordinates = { x: number; y: number }
+type Path = Coordinates[];
 
 export class Peasant extends Phaser.Physics.Arcade.Sprite {
   parentScene: GameScene;
@@ -54,6 +55,18 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
 
   private resetPartyTimer() {
     this.partyTimer = this.partyTime;
+  }
+
+  private setPathTo(target: Coordinates, cb: (path: Path)=>void) {
+    const {x: targetX, y:targetY} = target;
+    const {level} = this.parentScene;
+    const { x, y } = level.buildingLayer.getTileAtWorldXY(this.x, this.y, true);
+    const { x: endX, y: endY } = level.buildingLayer.getTileAtWorldXY(targetX, targetY, true);
+    level.easyStar.findPath(x, y, endX, endY, (path) => {
+      this.path = path;
+      cb(path);
+    });
+    level.easyStar.calculate();
   }
 
 
@@ -111,17 +124,11 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
   doPanic(_delta: number) {}
 
   doNeedABreak(_delta: number) {
-    const { level } = this.parentScene;
     this.targetBush = this.getClosestObject(this, this.parentScene.level.bushes.getChildren() as Phaser.GameObjects.Sprite[]);
-    const { x, y } = level.buildingLayer.getTileAtWorldXY(this.x, this.y, true);
-    const { x: endX, y: endY } = level.buildingLayer.getTileAtWorldXY(this.targetBush.x, this.targetBush.y, true);
-
-    level.easyStar.findPath(x, y, endX, endY, (path) => {
+    this.setPathTo(this.targetBush, ()=>{
       this.positionBeforeTinkle = {x: this.x, y: this.y};
-      this.path = path;
       this.currentState = PeasantState.HEAD_TOWARDS_BUSH;
-    });
-    level.easyStar.calculate();
+    })
   }
 
   doHeadTowardsBush(_delta: number) {
@@ -138,14 +145,9 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
   }
 
   doTinkleDone(_delta: number) {
-    const {level} = this.parentScene;
-    const { x, y } = level.buildingLayer.getTileAtWorldXY(this.x, this.y, true);
-    const { x: endX, y: endY } = level.buildingLayer.getTileAtWorldXY(this.positionBeforeTinkle.x, this.positionBeforeTinkle.y, true);
-    level.easyStar.findPath(x, y, endX, endY, (path) => {
-      this.path = path;
+    this.setPathTo(this.positionBeforeTinkle, ()=>{
       this.currentState = PeasantState.HEAD_BACK_TO_PARTY;
-    });
-    level.easyStar.calculate();
+    })
   }
 
   doHeadBackToParty(_delta: number) {
