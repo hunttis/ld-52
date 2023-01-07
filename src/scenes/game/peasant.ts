@@ -131,5 +131,7 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
 
   doTinkle(delta: number) {}
 
-  moveTowards(delta: number) {}
+  moveTowards(delta: number) {
+    this.path;
+  }
 }

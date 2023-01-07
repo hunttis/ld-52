@@ -20,14 +20,11 @@ export class GameScene extends Phaser.Scene {
     this.load.image("hidingplace", "assets/images/hidingplace.png");
     this.load.tilemapTiledJSON("level0", "assets/maps/level0.json");
     this.load.image("tilesheet", "assets/maps/tilesheet.png");
-    this.load.spritesheet(
-      "player_walking",
-      "assets/images/player/walking.png",
-      {
-        frameHeight: 70,
-        frameWidth: 54,
-      }
-    );
+    this.load.audio("music", "assets/audio/Night_1.mp3");
+    this.load.spritesheet("player_walking", "assets/images/player/walking.png", {
+      frameHeight: 70,
+      frameWidth: 54,
+    });
   }
 
   create() {
@@ -49,18 +46,10 @@ export class GameScene extends Phaser.Scene {
     this.add.existing(this.level);
 
     this.cameras.main.startFollow(this.cameraTarget, true, 0.05, 0.05);
-    this.cameras.main.setBounds(
-      0,
-      0,
-      this.level.getWidth(),
-      this.level.getHeight()
-    );
-    this.physics.world.setBounds(
-      0,
-      0,
-      this.level.getWidth(),
-      this.level.getHeight()
-    );
+    this.cameras.main.setBounds(0, 0, this.level.getWidth(), this.level.getHeight());
+    this.physics.world.setBounds(0, 0, this.level.getWidth(), this.level.getHeight());
+    this.sound.add("music");
+    this.sound.play("music", { loop: true });
   }
 
   update(time: number, delta: number) {
