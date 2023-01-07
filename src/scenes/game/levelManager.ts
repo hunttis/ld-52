@@ -1,5 +1,6 @@
 import { GameScene } from "../gameScene";
 import * as EasyStar from "easystarjs";
+import {Bush} from "./bush";
 
 export enum LayerName {
   BUILDINGS = "buildings",
@@ -48,7 +49,8 @@ export class LevelManager extends Phaser.GameObjects.Group {
       if (layer.name === LayerName.BUSHES) {
         layer.objects.forEach((obj) => {
           if (obj.x && obj.y) {
-            const bush = this.parentScene.add.sprite(obj.x, obj.y, SpriteName.BUSH);
+            let bush = new Bush(this.parentScene, obj.x, obj.y);
+              bush = this.parentScene.add.existing(bush);
             this.bushes.add(bush);
           }
         });
@@ -68,6 +70,10 @@ export class LevelManager extends Phaser.GameObjects.Group {
     this.easyStar.enableDiagonals();
     this.easyStar.setAcceptableTiles([-1]);
     this.easyStar.setGrid(this.buildingLayer.layer.data.map((col) => col.map((row) => row.index)));
+  }
+
+  getUnoccupiedBushes(): Phaser.GameObjects.Sprite[] {
+    return this.bushes.getChildren().filter( bush => (bush as Bush).isFree()) as Phaser.GameObjects.Sprite[];
   }
 
   findPathTo() {}
