@@ -38,7 +38,7 @@ export class GameWinScene extends Phaser.Scene {
 
     var spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     spaceKey.on("down", () => this.startGame());
-    this.sound.play("menumusic", { loop: true });
+    this.sound.play("menumusic", { loop: true, volume: 0.1 });
   }
 
   createStyledText(text: string, xLoc: number, yLoc: number, style: Phaser.Types.GameObjects.Text.TextStyle) {

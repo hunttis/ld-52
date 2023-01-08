@@ -127,7 +127,6 @@ export class GameScene extends Phaser.Scene {
     this.load.spritesheet("player_back_walk", "assets/images/player/back_walk_64x64.png", frameConfig);
     this.load.spritesheet("player_death", "assets/images/player/wolf_death_64x64_3s.png", frameConfig);
 
-
     this.load.spritesheet("player_side_idle", "assets/images/player/side_idle_64x64.png", frameConfig);
     this.load.spritesheet("player_side_walk", "assets/images/player/side_walk_64x64.png", frameConfig);
     this.load.spritesheet("peasant_man_walk", "assets/images/peasant/man_walk_64x64.png", frameConfig);
@@ -205,7 +204,7 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.guards, this.peasants);
     this.physics.add.collider(this.guards, this.guards);
 
-    this.cameras.main.startFollow(this.cameraTarget, true, 0.02, 0.02);
+    this.cameras.main.startFollow(this.cameraTarget, true, 0.04, 0.04);
     this.cameras.main.setBounds(0, 0, this.level.getWidth(), this.level.getHeight());
     this.physics.world.setBounds(0, 0, this.level.getWidth(), this.level.getHeight());
     this.sound.add("music");
@@ -218,16 +217,13 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
-    eventManager.on(Events.GAME_OVER, (_game, { wasBell }) => {
+    eventManager.on(Events.GAME_OVER, () => {
       if (this.gameOver) return;
       this.gameOver = true;
-      setTimeout(
-        () => {
-          this.sound.stopAll();
-          this.scene.start("GameOverScene");
-        },
-        wasBell ? 5_000 : 5_000
-      );
+      setTimeout(() => {
+        this.sound.stopAll();
+        this.scene.start("GameOverScene");
+      }, 5_000);
     });
 
     eventManager.on(Events.GAME_WON, () => {
@@ -244,7 +240,7 @@ export class GameScene extends Phaser.Scene {
         this.sound.play("bell_ring");
         this.bellRinging = true;
       }
-      eventManager.emit(Events.GAME_OVER, this, { wasBell: true });
+      eventManager.emit(Events.GAME_OVER, this, {});
     });
 
     this.ui = new Ui(this);

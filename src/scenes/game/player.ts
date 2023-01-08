@@ -59,7 +59,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   update(delta: number) {
     if (this.parentScene.gameOver) {
-      if(!this.deathAnimationPlayed) {
+      if (!this.deathAnimationPlayed) {
         this.anims.play("player_death", true);
         this.deathAnimationPlayed = true;
       }
