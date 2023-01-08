@@ -35,6 +35,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.anims.create({ key: "player_front_walk", frames: "player_front_walk", frameRate: 60, repeat: -1 });
     this.anims.create({ key: "player_back_walk", frames: "player_back_walk", frameRate: 60, repeat: -1 });
     this.anims.create({ key: "player_side_walk", frames: "player_side_walk", frameRate: 60, repeat: -1 });
+    this.anims.create({ key: "player_death", frames: "player_death", frameRate: 60, repeat: 0 });
     this.setDepth(10);
   }
 
@@ -57,8 +58,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   update(delta: number) {
     if (this.parentScene.gameOver) {
-      this.stop();
-      this.body.stop();
+      this.anims.play("player_death");
+      this.setVelocity(0);
       return;
     }
 

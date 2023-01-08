@@ -125,6 +125,8 @@ export class GameScene extends Phaser.Scene {
     this.load.spritesheet("player_front_walk", "assets/images/player/front_walk_64x64.png", frameConfig);
     this.load.spritesheet("player_back_idle", "assets/images/player/back_idle_64x64.png", frameConfig);
     this.load.spritesheet("player_back_walk", "assets/images/player/back_walk_64x64.png", frameConfig);
+    this.load.spritesheet("player_death", "assets/images/player/wolf_death_64x64_3s.png", frameConfig);
+
 
     this.load.spritesheet("player_side_idle", "assets/images/player/side_idle_64x64.png", frameConfig);
     this.load.spritesheet("player_side_walk", "assets/images/player/side_walk_64x64.png", frameConfig);
