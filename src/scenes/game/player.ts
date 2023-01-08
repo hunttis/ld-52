@@ -8,7 +8,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   cameraTarget: CameraTarget;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   controllable: boolean = true;
-  gameOver: boolean = false;
   canPounce: boolean = true;
   arrow!: Phaser.GameObjects.Sprite;
   shadow!: Phaser.GameObjects.Sprite;
@@ -18,7 +17,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   POUNCE_RANGE: number = 200;
   POUNCE_SPEED: number = 500;
   POUNCE_COOLDOWN: number = 1_000;
+  GROWL_COOLDOWN: number = 5_000;
 
+  growlCooldownTimer: number = this.GROWL_COOLDOWN;
   nearestPeasantDistance: number = 100000;
   nearestPeasant?: Peasant;
 
@@ -43,7 +44,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     });
     this.anims.create({
       key: "player_back_walk",
-      frames: "player_front_walk",
+      frames: "player_back_walk",
       frameRate: 60,
       repeat: -1,
     });
@@ -80,7 +81,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   update(delta: number) {
-    if (this.gameOver) {
+    if (this.parentScene.gameOver) {
       this.stop();
       this.body.stop();
       return;
@@ -152,10 +153,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.arrow.setVisible(true);
       this.arrow.setPosition(this.x, this.y);
       this.arrow.rotation = Phaser.Math.Angle.BetweenPoints(this.arrow, this.nearestPeasant);
-      // this.parentScene.sound.play("growl");
+      if (this.growlCooldownTimer < 0) {
+        this.growlCooldownTimer = this.GROWL_COOLDOWN;
+        this.parentScene.sound.play("growl", { volume: 0.5 });
+      }
     } else {
       this.arrow.setVisible(false);
     }
+    this.growlCooldownTimer -= delta;
 
     if (!this.controllable && this.nearestPeasant) {
       this.parentScene.physics.moveToObject(this, this.nearestPeasant, this.POUNCE_SPEED);
@@ -171,10 +176,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
           this.parentScene.sound.play("chomp2");
         }
         setTimeout(() => (this.canPounce = true), this.POUNCE_COOLDOWN);
-        console.log("KILL");
       }
     }
-    this.shadow.setPosition(this.x, this.y + 32);
+    this.shadow.setPosition(this.body.center.x, this.body.center.y + 24);
   }
 
   attackNearest() {

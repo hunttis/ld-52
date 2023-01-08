@@ -6,7 +6,6 @@ import { eventManager, Events } from "./eventsManager";
 export enum LayerName {
   BUILDINGS = "buildings",
   BUSHES = "bushes",
-  HIDING_PLACES = "hidingplaces",
   GROUND = "ground",
   ALARM = "alarm",
   PEASANT = "peasants",
@@ -14,7 +13,6 @@ export enum LayerName {
 
 export enum SpriteName {
   BUSH = "bush",
-  HIDING_PLACE = "hidingplace",
   ALARM_BELL = "bell",
 }
 
@@ -24,7 +22,6 @@ export class LevelManager extends Phaser.GameObjects.Group {
   buildingLayer: Phaser.Tilemaps.TilemapLayer;
   alarms!: Phaser.GameObjects.Group;
   bushes!: Phaser.GameObjects.Group;
-  hidingPlaces!: Phaser.GameObjects.Group;
   easyStar: EasyStar.js;
 
   static readonly GUARD_SPAWN_TIMER_MAX: number = 30_000;
@@ -34,7 +31,6 @@ export class LevelManager extends Phaser.GameObjects.Group {
     super(parent);
     this.parentScene = parent;
     this.bushes = new Phaser.GameObjects.Group(this.parentScene);
-    this.hidingPlaces = new Phaser.GameObjects.Group(this.parentScene);
     this.alarms = new Phaser.GameObjects.Group(this.parentScene);
     this.easyStar = new EasyStar.js();
 
@@ -60,13 +56,6 @@ export class LevelManager extends Phaser.GameObjects.Group {
           if (obj.x && obj.y) {
             const bush = this.parentScene.add.sprite(obj.x, obj.y, SpriteName.BUSH);
             this.bushes.add(bush);
-          }
-        });
-      } else if (layer.name === LayerName.HIDING_PLACES) {
-        layer.objects.forEach((obj) => {
-          if (obj.x && obj.y) {
-            const hidingPlace = this.parentScene.add.sprite(obj.x, obj.y, SpriteName.HIDING_PLACE);
-            this.hidingPlaces.add(hidingPlace);
           }
         });
       } else if (layer.name === LayerName.ALARM) {
@@ -98,9 +87,7 @@ export class LevelManager extends Phaser.GameObjects.Group {
 
   findPathTo() {}
 
-  create() {
-    console.log("Creating!");
-  }
+  create() {}
 
   update(delta: number) {
     this.guardSpawnTimer += delta;

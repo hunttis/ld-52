@@ -2,11 +2,10 @@ import { GameScene, TILE_SIZE } from "../gameScene";
 import { eventManager, Events } from "./eventsManager";
 
 class Vector2 extends Phaser.Math.Vector2 {}
-const { Distance } = Phaser.Math;
+const { Distance, Between, Clamp } = Phaser.Math;
 
 enum GuardState {
   PATROLLING,
-  BODY_SEEN,
   WEREWOLF_SEEN,
 }
 
@@ -39,16 +38,28 @@ export class Guard extends Phaser.Physics.Arcade.Sprite {
       .getChildren()
       .map((alarm) => (alarm as Phaser.GameObjects.Sprite).getCenter());
     Phaser.Utils.Array.Shuffle(this.patrolPath);
+    this.anims.create({ key: "guard_move", frames: "guard_move", frameRate: 60, repeat: -1 });
+    this.anims.create({ key: "guard_wave", frames: "guard_wave", frameRate: 60, repeat: -1 });
   }
 
   update() {
     stateActions(this)[this.currentState]();
   }
 
+  getSoundParams(): Phaser.Types.Sound.SoundConfig {
+    const detuneCount = Between(-400, 400);
+    const distance = Clamp(Distance.BetweenPoints(this, this.parentScene.player), 0, 1000);
+    const playerPos = this.parentScene.player.body.position;
+    let soundVector = new Vector2(this.x - playerPos.x, this.y - playerPos.y);
+    soundVector = soundVector.normalize();
+
+    return { detune: detuneCount, volume: Clamp(1 - distance / 1000, 0.1, 1), pan: soundVector.x };
+  }
+
   patrol() {
+    this.anims.play(`guard_move`, true);
     if (this.moveAlongPath()) {
-      this.patrolIndex = (this.patrolIndex + 1) % this.patrolPath.length; // In order
-      // this.patrolIndex = Phaser.Math.Between(0, this.patrolPath.length - 1); // Randomly
+      this.patrolIndex = (this.patrolIndex + 1) % this.patrolPath.length;
       const newTarget = this.patrolPath[this.patrolIndex];
       this.setPathTo(newTarget);
     }
@@ -59,12 +70,15 @@ export class Guard extends Phaser.Physics.Arcade.Sprite {
     const hit = hits.length === 0;
     const closeEnough = Distance.BetweenPoints(this, player) < this.losDistance;
 
-    if (hit && closeEnough) this.currentState = GuardState.WEREWOLF_SEEN;
+    if (hit && closeEnough) {
+      const sound = this.parentScene.panicSounds[Between(0, this.parentScene.panicSounds.length - 1)];
+      this.parentScene.sound.play(sound, this.getSoundParams());
+      this.currentState = GuardState.WEREWOLF_SEEN;
+    }
   }
 
-  bodySeen() {}
-
   werewolfSeen() {
+    this.anims.play(`guard_wave`, true);
     const { physics, player } = this.parentScene;
     physics.moveTo(this, player.x, player.y, this.speed * this.runMultiplier);
     if (Distance.BetweenPoints(this, player) < TILE_SIZE) {
@@ -106,7 +120,6 @@ export class Guard extends Phaser.Physics.Arcade.Sprite {
 
 const stateActions = (guard: Guard): { [state in GuardState]: () => void } => ({
   [GuardState.PATROLLING]: () => guard.patrol(),
-  [GuardState.BODY_SEEN]: () => guard.bodySeen(),
   [GuardState.WEREWOLF_SEEN]: () => guard.werewolfSeen(),
 });
 

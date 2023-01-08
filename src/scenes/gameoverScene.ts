@@ -26,20 +26,21 @@ export class GameOverScene extends Phaser.Scene {
 
     this.titleText = this.createStyledText("The Feast is over...", horizontalCenter, 100, titleStyle);
     this.instructionsText = this.createStyledText(
-      "The guards awoken by the bell killed you..",
+      "You died, killed by the guards",
       horizontalCenter,
       350,
       instructionStyle
     );
     this.startText = this.createStyledText(
-      "Go to main menu by pressing spacebar",
+      "Go to main menu by pressing enter",
       horizontalCenter,
       600,
       instructionStyle
     );
 
-    var spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    var spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     spaceKey.on("down", () => this.startGame());
+    this.sound.play("menumusic", { loop: true });
   }
 
   createStyledText(text: string, xLoc: number, yLoc: number, style: Phaser.Types.GameObjects.Text.TextStyle) {

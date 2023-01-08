@@ -4,9 +4,9 @@ import { LevelManager } from "./game/levelManager";
 import { Peasant } from "./game/peasant";
 import { Player } from "./game/player";
 import { Ui } from "./game/ui";
-import { Guard } from "./game/guard";
 
 import "./game/deadPeasant";
+import "./game/guard";
 
 const { Vector2 } = Phaser.Math;
 
@@ -20,6 +20,7 @@ export class GameScene extends Phaser.Scene {
   guards!: Phaser.GameObjects.Group;
   ui!: Ui;
   debugGraphics!: Phaser.GameObjects.Graphics;
+  gameOver = false;
 
   happySounds: string[] = [];
   tinkleMingleSounds: string[] = [];
@@ -47,7 +48,7 @@ export class GameScene extends Phaser.Scene {
 
   preload() {
     this.load.image("colorcube", "assets/images/colorcube.png");
-    this.load.image("bush", "assets/images/bush.png");
+    this.load.image("bush", "assets/images/bush-small.png");
     this.load.image("hidingplace", "assets/images/hidingplace.png");
     this.load.tilemapTiledJSON("level0", "assets/maps/level0.json");
     this.load.image("tilesheet", "assets/maps/tilesheet.png");
@@ -74,6 +75,7 @@ export class GameScene extends Phaser.Scene {
     this.loadAudio("huh-aargh", "huh-aargh", this.panicSounds);
     // Angry sounds
     this.loadAudio("begonefoulbeast", "begonefoulbeast", this.angrySounds);
+    this.loadAudio("hey", "hey", this.angrySounds);
     // Bush sounds
     this.loadAudio("needtogo", "needtogo", this.bushSounds);
     this.loadAudio("excuseme", "excuseme", this.bushSounds);
@@ -86,7 +88,6 @@ export class GameScene extends Phaser.Scene {
     this.loadAudio("wohoo", "wohoo", this.happySounds);
     this.loadAudio("hahamightyfeast", "hahamightyfeast", this.happySounds);
     this.loadAudio("hehehe", "hehehe", this.happySounds);
-    this.loadAudio("hey", "hey", this.angrySounds);
     this.loadAudio("huhhee", "huhhee", this.happySounds);
     this.loadAudio("jeei", "jeei", this.happySounds);
     this.loadAudio("letshaveanother", "letshaveanother", this.happySounds);
@@ -112,60 +113,32 @@ export class GameScene extends Phaser.Scene {
     this.loadAudio("aarrgghh", "aarrgghh", this.deathSounds);
     this.loadAudio("argh1", "argh1", this.deathSounds);
     this.loadAudio("haargh", "haargh", this.deathSounds);
-    this.loadAudio("hnng-argh", "hnng-argh", this.deathSounds);
+    this.loadAudio("hngg-argh", "hngg-argh", this.deathSounds);
     this.loadAudio("death1", "death1", this.deathSounds);
     this.loadAudio("death2", "death2", this.deathSounds);
     this.loadAudio("death3", "death3", this.deathSounds);
     this.loadAudio("death4", "death4", this.deathSounds);
 
-    this.load.spritesheet("player_front_idle", "assets/images/player/front_idle_64x64.png", {
-      frameHeight: 64,
-      frameWidth: 64,
-    });
-    this.load.spritesheet("player_front_walk", "assets/images/player/front_walk_64x64.png", {
-      frameHeight: 64,
-      frameWidth: 64,
-    });
-    this.load.spritesheet("player_side_idle", "assets/images/player/side_idle_64x64.png", {
-      frameHeight: 64,
-      frameWidth: 64,
-    });
-    this.load.spritesheet("player_side_walk", "assets/images/player/side_walk_64x64.png", {
-      frameHeight: 64,
-      frameWidth: 64,
-    });
-    this.load.spritesheet("peasant_man_walk", "assets/images/peasant/man_walk_64x64.png", {
-      frameHeight: 64,
-      frameWidth: 64,
-    });
-    this.load.spritesheet("peasant_man_death", "assets/images/peasant/man_death_64x64.png", {
-      frameHeight: 64,
-      frameWidth: 64,
-    });
-    this.load.spritesheet("peasant_man_idle", "assets/images/peasant/man_idle_64x64.png", {
-      frameHeight: 64,
-      frameWidth: 64,
-    });
-    this.load.spritesheet("peasant_man_party", "assets/images/peasant/man_party_64x64.png", {
-      frameHeight: 64,
-      frameWidth: 64,
-    });
-    this.load.spritesheet("peasant_woman_walk", "assets/images/peasant/woman_walk_64x64.png", {
-      frameHeight: 64,
-      frameWidth: 64,
-    });
-    this.load.spritesheet("peasant_woman_death", "assets/images/peasant/woman_death_64x64.png", {
-      frameHeight: 64,
-      frameWidth: 64,
-    });
-    this.load.spritesheet("peasant_woman_idle", "assets/images/peasant/woman_idle_64x64.png", {
-      frameHeight: 64,
-      frameWidth: 64,
-    });
-    this.load.spritesheet("peasant_woman_party", "assets/images/peasant/woman_party_64x64.png", {
-      frameHeight: 64,
-      frameWidth: 64,
-    });
+    const frameConfig: Phaser.Types.Loader.FileTypes.ImageFrameConfig = { frameHeight: 64, frameWidth: 64 };
+
+    this.load.spritesheet("player_front_idle", "assets/images/player/front_idle_64x64.png", frameConfig);
+    this.load.spritesheet("player_front_walk", "assets/images/player/front_walk_64x64.png", frameConfig);
+    this.load.spritesheet("player_back_idle", "assets/images/player/back_idle_64x64.png", frameConfig);
+    this.load.spritesheet("player_back_walk", "assets/images/player/back_walk_64x64.png", frameConfig);
+
+    this.load.spritesheet("player_side_idle", "assets/images/player/side_idle_64x64.png", frameConfig);
+    this.load.spritesheet("player_side_walk", "assets/images/player/side_walk_64x64.png", frameConfig);
+    this.load.spritesheet("peasant_man_walk", "assets/images/peasant/man_walk_64x64.png", frameConfig);
+    this.load.spritesheet("peasant_man_death", "assets/images/peasant/man_death_64x64.png", frameConfig);
+    this.load.spritesheet("peasant_man_idle", "assets/images/peasant/man_idle_64x64.png", frameConfig);
+    this.load.spritesheet("peasant_man_party", "assets/images/peasant/man_party_64x64.png", frameConfig);
+    this.load.spritesheet("peasant_woman_walk", "assets/images/peasant/woman_walk_64x64.png", frameConfig);
+    this.load.spritesheet("peasant_woman_death", "assets/images/peasant/woman_death_64x64.png", frameConfig);
+    this.load.spritesheet("peasant_woman_idle", "assets/images/peasant/woman_idle_64x64.png", frameConfig);
+    this.load.spritesheet("peasant_woman_party", "assets/images/peasant/woman_party_64x64.png", frameConfig);
+    this.load.spritesheet("guard_idle", "assets/images/guard_idle_64x64.png", frameConfig);
+    this.load.spritesheet("guard_move", "assets/images/guard_move_64x64.png", frameConfig);
+    this.load.spritesheet("guard_wave", "assets/images/guard_wave_64x64.png", frameConfig);
     this.load.image("shadow", "assets/images/player/shadow.png");
     this.load.image("blood", "assets/images/placeholder_blood_splatter.png");
     this.load.image("arrow", "assets/images/arrow.png");
@@ -177,6 +150,7 @@ export class GameScene extends Phaser.Scene {
     const pressEsc = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
     const gotoMenu = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.N);
     const makePeasantPanic = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+    const playSound = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K);
 
     // init handlers
     pressEsc.on("down", () => {
@@ -192,9 +166,16 @@ export class GameScene extends Phaser.Scene {
     makePeasantPanic.on("down", () => {
       (this.peasants.getChildren()[0] as Peasant).doPanic(0);
     });
+
+    playSound.on("down", () => {
+      const sounds = this.happySounds;
+      const sound = sounds[Phaser.Math.Between(0, sounds.length - 1)];
+      this.sound.play(sound);
+    });
   }
 
   create() {
+    this.gameOver = false;
     const muteButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
     muteButton.on("down", () => (this.sound.mute = !this.sound.mute));
 
@@ -235,9 +216,16 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
-    eventManager.on(Events.GAME_OVER, () => {
-      this.sound.stopAll();
-      this.scene.start("GameOverScene");
+    eventManager.on(Events.GAME_OVER, (_game, { wasBell }) => {
+      if (this.gameOver) return;
+      this.gameOver = true;
+      setTimeout(
+        () => {
+          this.sound.stopAll();
+          this.scene.start("GameOverScene");
+        },
+        wasBell ? 5_000 : 0
+      );
     });
 
     eventManager.on(Events.GAME_WON, () => {
@@ -253,10 +241,8 @@ export class GameScene extends Phaser.Scene {
       if (!this.bellRinging) {
         this.sound.play("bell_ring");
         this.bellRinging = true;
-        this.player.gameOver = true;
       }
-
-      setTimeout(() => eventManager.emit(Events.GAME_OVER, this, {}), 5 * 1000);
+      eventManager.emit(Events.GAME_OVER, this, { wasBell: true });
     });
 
     this.ui = new Ui(this);

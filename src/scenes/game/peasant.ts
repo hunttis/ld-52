@@ -137,7 +137,6 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
   }
 
   update(_time: number, delta: number) {
-    // console.log(this.currentState);
     switch (this.currentState) {
       case PeasantState.PARTY:
         this.checkLos(delta);
@@ -189,7 +188,7 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
       case PeasantState.IDLE:
         break;
       default:
-        console.log("WTFBBQ?!");
+      // Do nothing
     }
   }
 
@@ -211,7 +210,6 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
     const closeEnough = Distance.BetweenPoints(this, player) < this.LOS_DISTANCE;
     if (this.debugDrawLos) {
       this.drawLos(los);
-      console.log(hit, closeEnough);
     }
 
     if (hit && closeEnough) {
@@ -232,14 +230,11 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
   }
 
   doParty(delta: number) {
-    // console.log("Par-tayy " + this.partyTimer);
     this.partyTimer -= delta;
     this.partySoundCooldown -= delta;
 
     if (this.partySoundCooldown < 0) {
       const partySound = Between(0, this.parentScene.happySounds.length - 1);
-      console.log("Volume of sound would be:", this.getSoundParams());
-
       this.parentScene.sound.play(this.parentScene.happySounds[partySound], this.getSoundParams());
       this.partySoundCooldown = this.PARTY_SOUND_COOLDOWN_MAX;
     }
@@ -314,7 +309,6 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
   die() {
     const soundIndex = Between(0, this.parentScene.deathSounds.length - 1);
     const sound = this.parentScene.deathSounds[soundIndex];
-    console.log(`Death sound: ${soundIndex}: ${sound}`);
     this.parentScene.sound.play(sound, this.getSoundParams());
     this.panicIndicator.setVisible(false);
     this.parentScene.peasants.remove(this);

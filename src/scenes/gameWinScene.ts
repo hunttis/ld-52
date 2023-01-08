@@ -30,14 +30,15 @@ export class GameWinScene extends Phaser.Scene {
     this.createStyledText("Thanks for playing!", horizontalCenter, 550, instructionStyle);
 
     this.startText = this.createStyledText(
-      "Go to main menu by pressing spacebar",
+      "Go to main menu by pressing enter",
       horizontalCenter,
       630,
       instructionStyle
     );
 
-    var spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    var spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     spaceKey.on("down", () => this.startGame());
+    this.sound.play("menumusic", { loop: true });
   }
 
   createStyledText(text: string, xLoc: number, yLoc: number, style: Phaser.Types.GameObjects.Text.TextStyle) {

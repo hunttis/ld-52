@@ -17,12 +17,9 @@ export function startGame() {
     },
     physics: {
       default: "arcade",
-      arcade: {
-        debug: true,
-      },
     },
     parent: "game",
-    scene: [GameScene, MenuScene, GameOverScene, GameWinScene],
+    scene: [MenuScene, GameScene, GameOverScene, GameWinScene],
   };
 
   return new Phaser.Game(config);

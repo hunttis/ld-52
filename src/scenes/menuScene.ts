@@ -33,9 +33,9 @@ export class MenuScene extends Phaser.Scene {
       350,
       instructionStyle
     );
-    this.startText = this.createStyledText("Start by pressing spacebar", horizontalCenter, 600, instructionStyle);
+    this.startText = this.createStyledText("Start by pressing enter", horizontalCenter, 600, instructionStyle);
 
-    var spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    var spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     spaceKey.on("down", () => this.startGame());
     this.sound.play("menumusic", { loop: true });
   }
