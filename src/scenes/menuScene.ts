@@ -11,9 +11,14 @@ export class MenuScene extends Phaser.Scene {
 
   preload() {
     this.load.audio("menumusic", "assets/audio/Alku.mp3");
+    this.load.image("titleimage", "assets/images/titleimage.jpg");
   }
 
   create() {
+    const titleImage = this.add.image(this.cameras.main.width, this.cameras.main.height, "titleimage");
+    titleImage.setOrigin(1, 1);
+    titleImage.setScale(0.5);
+
     const horizontalCenter = this.cameras.main.width / 2;
     const titleStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       fontFamily: "MedievalSharp",
@@ -26,14 +31,21 @@ export class MenuScene extends Phaser.Scene {
       fontSize: "32px",
     };
 
-    this.titleText = this.createStyledText("The Feast of Gévaudan", horizontalCenter, 100, titleStyle);
-    this.instructionsText = this.createStyledText(
-      "Arrow keys to control, space to attack when near peasant",
-      horizontalCenter,
-      350,
+    this.startText = this.createStyledText(
+      "Peasants have cursed you.\nHarvest the peasants.\n\nWatch out for the clerics.\nthey will kill you.",
+      50,
+      250,
       instructionStyle
     );
-    this.startText = this.createStyledText("Start by pressing enter", horizontalCenter, 600, instructionStyle);
+
+    this.titleText = this.createStyledText("The Feast of Gévaudan", 50, 50, titleStyle);
+    this.instructionsText = this.createStyledText(
+      "Arrow keys to control\n\nSpace to attack\nwhen near peasant",
+      50,
+      500,
+      instructionStyle
+    );
+    this.startText = this.createStyledText("Start by pressing enter", 50, 700, instructionStyle);
 
     var spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     spaceKey.on("down", () => this.startGame());
@@ -43,7 +55,7 @@ export class MenuScene extends Phaser.Scene {
   createStyledText(text: string, xLoc: number, yLoc: number, style: Phaser.Types.GameObjects.Text.TextStyle) {
     const newTextItem = this.add.text(xLoc, yLoc, text, style);
     newTextItem.setPosition(xLoc, yLoc);
-    newTextItem.setOrigin(0.5);
+    newTextItem.setOrigin(0);
     return newTextItem;
   }
 

@@ -13,13 +13,14 @@ export class Ui {
   parentScene: GameScene;
   currentTutorialText: string;
   tutorialTexts: string[] = [
-    "The hunger... It's almost too much",
     "Looks like the peasants are enjoying the night..",
-    "Let's see if I can change that..",
     "I can pounce [SPACEBAR] when I'm near a peasant",
-    "I cannot linger close to them for too long or they'll ring that damned alarm.",
+    "I can't kill the clerics, but they can kill me. Need to avoid them.",
+    "Let's see if I can change the tune of the evening..",
+    "I cannot linger close to the peasants for long or they'll ring that damned alarm.",
     "Ringing the bell will bring the guards from all over, I will die",
     "I have to Kill them fast, when they're alone",
+    "The hunger... It's almost too much",
   ];
   tutorialTextObject!: Phaser.GameObjects.Text;
 
@@ -28,11 +29,22 @@ export class Ui {
   TUTORIALAUTOADVANCE: number = 5000;
   tutorialCooldown: number = this.TUTORIALAUTOADVANCE;
 
+  peasantCountText!: Phaser.GameObjects.Text;
+
   currentTutorialState: TutorialState = TutorialState.TRANSITIONING_IN;
 
   constructor(gameScene: GameScene) {
     this.parentScene = gameScene;
     this.currentTutorialText = this.tutorialTexts[0];
+
+    this.peasantCountText = this.parentScene.add.text(10, 10, "Peasants left: ", {
+      fontSize: "24px",
+      stroke: "#000000",
+      strokeThickness: 10,
+    });
+    this.peasantCountText.setDepth(100);
+    this.peasantCountText.setScrollFactor(0, 0);
+
     this.tutorialTextObject = this.parentScene.add.text(
       this.parentScene.cameras.main.width / 2,
       this.parentScene.cameras.main.height / 2,
@@ -59,6 +71,11 @@ export class Ui {
   }
 
   update(delta: number) {
+    const countText = "Peasants left: " + this.parentScene.peasants.countActive();
+    if (countText != this.peasantCountText.text) {
+      this.peasantCountText.setText(countText);
+    }
+
     switch (this.currentTutorialState) {
       case TutorialState.SHOWING_TEXT:
         this.tutorialCooldown -= delta;

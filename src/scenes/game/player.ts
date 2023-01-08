@@ -109,8 +109,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
     }
 
-    this.cameraTarget.setPosition(this.x + this.body.velocity.x * 0.75, this.y + this.body.velocity.y * 0.75);
-
     this.parentScene.peasants.children.each((peasant) => {
       const distance = Phaser.Math.Distance.BetweenPoints(this, peasant.body.position);
 
@@ -156,6 +154,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         setTimeout(() => (this.canPounce = true), this.POUNCE_COOLDOWN);
       }
     }
+    this.cameraTarget.setPosition(this.x + this.body.velocity.x * 0.75, this.y + this.body.velocity.y * 0.75);
+
     this.shadow.setPosition(this.body.center.x, this.body.center.y + 24);
   }
 

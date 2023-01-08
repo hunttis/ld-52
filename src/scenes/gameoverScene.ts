@@ -26,7 +26,7 @@ export class GameOverScene extends Phaser.Scene {
 
     this.titleText = this.createStyledText("The Feast is over...", horizontalCenter, 100, titleStyle);
     this.instructionsText = this.createStyledText(
-      "You died, killed by the guards",
+      "You died, killed by the clerics",
       horizontalCenter,
       350,
       instructionStyle
