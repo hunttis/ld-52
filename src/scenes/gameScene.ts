@@ -226,7 +226,7 @@ export class GameScene extends Phaser.Scene {
           this.sound.stopAll();
           this.scene.start("GameOverScene");
         },
-        wasBell ? 5_000 : 0
+        wasBell ? 5_000 : 5_000
       );
     });
 

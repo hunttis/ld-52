@@ -11,6 +11,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   canPounce: boolean = true;
   arrow!: Phaser.GameObjects.Sprite;
   shadow!: Phaser.GameObjects.Sprite;
+  deathAnimationPlayed: boolean = false;
 
   SPEED: number = 600;
   KILL_RANGE: number = 32;
@@ -58,7 +59,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   update(delta: number) {
     if (this.parentScene.gameOver) {
-      this.anims.play("player_death");
+      if(!this.deathAnimationPlayed) {
+        this.anims.play("player_death", true);
+        this.deathAnimationPlayed = true;
+      }
       this.setVelocity(0);
       return;
     }
