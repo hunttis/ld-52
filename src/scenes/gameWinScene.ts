@@ -48,7 +48,7 @@ export class GameWinScene extends Phaser.Scene {
     return newTextItem;
   }
 
-  update(time: number, delta: number) {}
+  update(_time: number, _delta: number) {}
 
   startGame() {
     this.sound.stopAll();

@@ -19,7 +19,6 @@ export class MenuScene extends Phaser.Scene {
     titleImage.setOrigin(1, 1);
     titleImage.setScale(0.5);
 
-    const horizontalCenter = this.cameras.main.width / 2;
     const titleStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       fontFamily: "MedievalSharp",
       fontSize: "110px",
@@ -59,7 +58,7 @@ export class MenuScene extends Phaser.Scene {
     return newTextItem;
   }
 
-  update(time: number, delta: number) {}
+  update(_time: number, _delta: number) {}
 
   startGame() {
     this.sound.stopAll();
