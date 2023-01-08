@@ -1,8 +1,7 @@
-import { Vector } from "matter";
 import { GameScene, TILE_SIZE } from "../gameScene";
 import { eventManager, Events } from "./eventsManager";
 
-const { Distance } = Phaser.Math;
+const { Distance, Between, Clamp, Vector2 } = Phaser.Math;
 
 enum PeasantState {
   PARTY,
@@ -53,12 +52,14 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
   PARTY_SOUND_COOLDOWN_MAX: number = 30_000;
   PARTY_SOUND_COOLDOWN_MIN: number = 5_000;
   partySoundCooldown!: number;
+  static readonly TINKLE_MINGLE_CHANCE = 0.2;
+  tinkleMingle: boolean = false;
 
   constructor(gameScene: GameScene, xLoc: number, yLoc: number) {
     super(gameScene, xLoc, yLoc, "null");
     this.parentScene = gameScene;
     this.name = "Peasant";
-    this.speed = Phaser.Math.Between(TILE_SIZE, TILE_SIZE * 2);
+    this.speed = Between(TILE_SIZE, TILE_SIZE * 2);
     this.resetTinkleTimer();
     this.resetPartyTimer();
     this.resetPartySoundTimer();
@@ -79,7 +80,7 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
   }
 
   private getRandomObject(targets: Phaser.GameObjects.Sprite[]): Phaser.GameObjects.Sprite {
-    return targets[Phaser.Math.Between(0, targets.length - 1)];
+    return targets[Between(0, targets.length - 1)];
   }
 
   private resetTinkleTimer() {
@@ -91,8 +92,7 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
   }
 
   private resetPartySoundTimer() {
-    this.partySoundCooldown = this.PARTY_SOUND_COOLDOWN_MAX * Math.random() + 5_000;
-    console.log(this.partySoundCooldown);
+    this.partySoundCooldown = this.PARTY_SOUND_COOLDOWN_MIN + this.PARTY_SOUND_COOLDOWN_MAX * Math.random();
   }
 
   private setPathTo(target: Point, cb: (path: Path) => void) {
@@ -123,42 +123,12 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
     this.panicIndicator.setOrigin(0, 0.5);
     this.panicIndicator.setVisible(false);
     this.debugLos = this.parentScene.add.graphics({ lineStyle: { color: 0xff0055 } });
-    this.anims.create({
-      key: "peasant_man_walk",
-      frames: "peasant_man_walk",
-      frameRate: 60,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "peasant_man_party",
-      frames: "peasant_man_party",
-      frameRate: 60,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "peasant_man_idle",
-      frames: "peasant_man_idle",
-      frameRate: 60,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "peasant_woman_walk",
-      frames: "peasant_woman_walk",
-      frameRate: 60,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "peasant_woman_party",
-      frames: "peasant_woman_party",
-      frameRate: 60,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "peasant_woman_idle",
-      frames: "peasant_woman_idle",
-      frameRate: 60,
-      repeat: -1,
-    });
+    this.anims.create({ key: "peasant_man_walk", frames: "peasant_man_walk", frameRate: 60, repeat: -1 });
+    this.anims.create({ key: "peasant_man_party", frames: "peasant_man_party", frameRate: 60, repeat: -1 });
+    this.anims.create({ key: "peasant_man_idle", frames: "peasant_man_idle", frameRate: 60, repeat: -1 });
+    this.anims.create({ key: "peasant_woman_walk", frames: "peasant_woman_walk", frameRate: 60, repeat: -1 });
+    this.anims.create({ key: "peasant_woman_party", frames: "peasant_woman_party", frameRate: 60, repeat: -1 });
+    this.anims.create({ key: "peasant_woman_idle", frames: "peasant_woman_idle", frameRate: 60, repeat: -1 });
   }
 
   destroy(): void {
@@ -196,7 +166,12 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
       case PeasantState.HEAD_TOWARDS_BUSH:
         this.checkLos(delta);
         this.playWalkAnimation();
-        this.moveAndUpdateStateWhenDone(PeasantState.TINKLE, delta);
+        this.moveAndUpdateStateWhenDone(
+          PeasantState.TINKLE,
+          delta,
+          undefined,
+          () => (this.tinkleMingle = Math.random() < Peasant.TINKLE_MINGLE_CHANCE)
+        );
         break;
       case PeasantState.TINKLE:
         this.playIdleAnimation();
@@ -221,7 +196,6 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
   playWalkAnimation() {
     this.anims.play(`peasant_${this.gender}_walk`, true);
   }
-  playDeathAnimation() {}
   playPartyAnimation() {
     this.anims.play(`peasant_${this.gender}_party`, true);
   }
@@ -241,17 +215,20 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
     }
 
     if (hit && closeEnough) {
-      this.susMeter = Phaser.Math.Clamp(this.susMeter + delta, 0, this.susMeterMax);
+      this.susMeter = Clamp(this.susMeter + delta, 0, this.susMeterMax);
       if (this.susMeter >= this.susMeterMax) this.currentState = PeasantState.PANIC;
     } else {
-      this.susMeter = Phaser.Math.Clamp(this.susMeter - delta, 0, this.susMeterMax);
+      this.susMeter = Clamp(this.susMeter - delta, 0, this.susMeterMax);
     }
   }
 
-  moveAndUpdateStateWhenDone(endState: PeasantState, _delta?: number, mutator?: () => void) {
+  moveAndUpdateStateWhenDone(endState: PeasantState, _delta?: number, mutator?: () => void, onDone?: () => void) {
     const isDone = this.moveAlongPath();
-    if (mutator) mutator();
-    if (isDone) this.currentState = endState;
+    mutator?.();
+    if (isDone) {
+      this.currentState = endState;
+      onDone?.();
+    }
   }
 
   doParty(delta: number) {
@@ -260,7 +237,7 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
     this.partySoundCooldown -= delta;
 
     if (this.partySoundCooldown < 0) {
-      const partySound = Phaser.Math.Between(0, this.parentScene.happySounds.length - 1);
+      const partySound = Between(0, this.parentScene.happySounds.length - 1);
       console.log("Volume of sound would be:", this.getSoundParams());
 
       this.parentScene.sound.play(this.parentScene.happySounds[partySound], this.getSoundParams());
@@ -273,13 +250,13 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
   }
 
   getSoundParams(): Phaser.Types.Sound.SoundConfig {
-    const detuneCount = Phaser.Math.Between(-200, 200);
-    const distance = Phaser.Math.Clamp(Phaser.Math.Distance.BetweenPoints(this, this.parentScene.player), 0, 1000);
+    const detuneCount = Between(-400, 400);
+    const distance = Clamp(Distance.BetweenPoints(this, this.parentScene.player), 0, 1000);
     const playerPos = this.parentScene.player.body.position;
-    let soundVector = new Phaser.Math.Vector2(this.x - playerPos.x, this.y - playerPos.y);
+    let soundVector = new Vector2(this.x - playerPos.x, this.y - playerPos.y);
     soundVector = soundVector.normalize();
 
-    return { detune: detuneCount, volume: Phaser.Math.Clamp(1 - distance / 1000, 0.1, 1), pan: soundVector.x };
+    return { detune: detuneCount, volume: Clamp(1 - distance / 1000, 0.1, 1), pan: soundVector.x };
   }
 
   doPatrol(_delta: number) {}
@@ -293,7 +270,7 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
     });
 
     if (!this.panicSoundPlayed) {
-      const panicSound = Phaser.Math.Between(0, this.parentScene.panicSounds.length - 1);
+      const panicSound = Between(0, this.parentScene.panicSounds.length - 1);
       this.parentScene.sound.play(this.parentScene.panicSounds[panicSound], this.getSoundParams());
       this.panicSoundPlayed = true;
     }
@@ -321,6 +298,11 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
       this.resetTinkleTimer();
       this.LOS_DISTANCE = this.NORMAL_LOS_DISTANCE;
     }
+    if (this.tinkleMingle) {
+      this.tinkleMingle = false;
+      const sound = this.parentScene.tinkleMingleSounds[Between(0, this.parentScene.tinkleMingleSounds.length - 1)];
+      this.parentScene.sound.play(sound, this.getSoundParams());
+    }
   }
 
   doTinkleDone(_delta: number) {
@@ -330,6 +312,10 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
   }
 
   die() {
+    const soundIndex = Between(0, this.parentScene.deathSounds.length - 1);
+    const sound = this.parentScene.deathSounds[soundIndex];
+    console.log(`Death sound: ${soundIndex}: ${sound}`);
+    this.parentScene.sound.play(sound, this.getSoundParams());
     this.panicIndicator.setVisible(false);
     this.parentScene.peasants.remove(this);
     const location = this.body.position;
@@ -346,9 +332,7 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
     }
 
     const { level, physics } = this.parentScene;
-    const target = level.buildingLayer
-      .tileToWorldXY(nextNode.x, nextNode.y)
-      .add(new Phaser.Math.Vector2(TILE_SIZE / 2));
+    const target = level.buildingLayer.tileToWorldXY(nextNode.x, nextNode.y).add(new Vector2(TILE_SIZE / 2));
     physics.moveTo(this, target.x, target.y, this.speed);
 
     if (Distance.BetweenPoints(this.getCenter(), target) < TILE_SIZE / 2) this.path.shift();

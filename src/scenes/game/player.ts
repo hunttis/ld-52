@@ -81,7 +81,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   update(delta: number) {
     if (this.gameOver) {
-      console.log("player should be stopped");
       this.stop();
       this.body.stop();
       return;

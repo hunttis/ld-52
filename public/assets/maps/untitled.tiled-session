@@ -13,11 +13,11 @@
             "scaleInDock": 1
         },
         "level0.json": {
-            "scale": 0.1799,
-            "selectedLayer": 0,
+            "scale": 0.1656,
+            "selectedLayer": 5,
             "viewCenter": {
-                "x": 3702.0566981656484,
-                "y": 2732.0733740967207
+                "x": 3722.826086956522,
+                "y": 2599.6376811594205
             }
         },
         "level0.json#placeholder": {
@@ -51,17 +51,14 @@
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
-        "level0.tmx",
-        "placeholder.tsx",
-        "level0.json",
-        "tilesheet.tsx"
+        "level0.json"
     ],
     "project": "untitled.tiled-project",
     "recentFiles": [
+        "level0.json",
         "level0.tmx",
         "placeholder.tsx",
-        "tilesheet.tsx",
-        "level0.json"
+        "tilesheet.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {

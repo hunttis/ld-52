@@ -25,7 +25,7 @@ export class Ui {
 
   tutorialWillAdvance: boolean = false;
   currentTutorialStep: number = 0;
-  TUTORIALAUTOADVANCE: number = 0 * 1000;
+  TUTORIALAUTOADVANCE: number = 5000;
   tutorialCooldown: number = this.TUTORIALAUTOADVANCE;
 
   currentTutorialState: TutorialState = TutorialState.TRANSITIONING_IN;
@@ -78,7 +78,6 @@ export class Ui {
         this.currentTutorialState = TutorialState.PROCESSING;
         break;
       case TutorialState.SWAPPING_NEXT_TEXT:
-        console.log("SWAPPING TEXT");
         this.tutorialTextObject.setText(this.tutorialTexts[this.currentTutorialStep]);
         this.setTutorialTextPosition();
         this.currentTutorialState = TutorialState.TRANSITIONING_IN;
@@ -96,15 +95,12 @@ export class Ui {
 
   moveToShowingText() {
     this.currentTutorialState = TutorialState.SHOWING_TEXT;
-    console.log("Moving to SHOWING_TEXT");
   }
 
   swapToNextText() {
     if (this.tutorialTexts[this.currentTutorialStep]) {
-      console.log("Swapping to next tutorial text:", this.tutorialTexts[this.currentTutorialStep]);
       this.currentTutorialState = TutorialState.SWAPPING_NEXT_TEXT;
     } else {
-      console.log("No more tutorial texts");
       this.tutorialTextObject.setText("");
       this.currentTutorialState = TutorialState.COMPLETE;
     }

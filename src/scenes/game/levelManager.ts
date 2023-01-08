@@ -15,7 +15,7 @@ export enum LayerName {
 export enum SpriteName {
   BUSH = "bush",
   HIDING_PLACE = "hidingplace",
-  ALARM_BELL = "alarm",
+  ALARM_BELL = "bell",
 }
 
 export class LevelManager extends Phaser.GameObjects.Group {
@@ -73,6 +73,7 @@ export class LevelManager extends Phaser.GameObjects.Group {
         layer.objects.forEach((obj) => {
           if (obj.x && obj.y) {
             const alarmBell = this.parentScene.add.sprite(obj.x, obj.y, SpriteName.ALARM_BELL);
+            alarmBell.setScale(0.5);
             this.alarms.add(alarmBell);
           }
         });
@@ -105,7 +106,7 @@ export class LevelManager extends Phaser.GameObjects.Group {
     this.guardSpawnTimer += delta;
     if (this.guardSpawnTimer > LevelManager.GUARD_SPAWN_TIMER_MAX) {
       this.guardSpawnTimer -= LevelManager.GUARD_SPAWN_TIMER_MAX;
-      const guardSpawnTile = this.buildingLayer.getTileAt(58, 32);
+      const guardSpawnTile = this.buildingLayer.getTileAt(58, 32, true);
       eventManager.emit(Events.SPAWN_GUARD, this.parentScene, {
         location: new Phaser.Math.Vector2(guardSpawnTile.getCenterX(), guardSpawnTile.getCenterY()),
       });

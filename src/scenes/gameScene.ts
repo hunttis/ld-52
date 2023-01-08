@@ -3,10 +3,12 @@ import { eventManager, Events } from "./game/eventsManager";
 import { LevelManager } from "./game/levelManager";
 import { Peasant } from "./game/peasant";
 import { Player } from "./game/player";
-
-import "./game/deadPeasant";
 import { Ui } from "./game/ui";
 import { Guard } from "./game/guard";
+
+import "./game/deadPeasant";
+
+const { Vector2 } = Phaser.Math;
 
 export const TILE_SIZE = 64;
 
@@ -20,9 +22,12 @@ export class GameScene extends Phaser.Scene {
   debugGraphics!: Phaser.GameObjects.Graphics;
 
   happySounds: string[] = [];
+  tinkleMingleSounds: string[] = [];
   bushSounds: string[] = [];
   panicSounds: string[] = [];
   angrySounds: string[] = [];
+  deathSounds: string[] = [];
+
   bellRinging: boolean = false;
 
   constructor() {
@@ -46,6 +51,8 @@ export class GameScene extends Phaser.Scene {
     this.load.image("hidingplace", "assets/images/hidingplace.png");
     this.load.tilemapTiledJSON("level0", "assets/maps/level0.json");
     this.load.image("tilesheet", "assets/maps/tilesheet.png");
+    this.load.image("bell", "assets/images/bell.png");
+
     this.load.audio("music", "assets/audio/Night_1.mp3");
     this.loadAudio("chomp1", "lokichomp1");
     this.loadAudio("chomp2", "lokichomp2");
@@ -60,6 +67,11 @@ export class GameScene extends Phaser.Scene {
     this.loadAudio("whatisthat", "whatisthat", this.panicSounds);
     this.loadAudio("pleasedonthitme", "pleasedonthitme", this.panicSounds);
     this.loadAudio("ohlordinheaven", "ohlordinheaven", this.panicSounds);
+    this.loadAudio("helphelp", "helphelp", this.panicSounds);
+    this.loadAudio("haaaahh", "haaaahh", this.panicSounds);
+    this.loadAudio("rraaaa", "rraaaa", this.panicSounds);
+    this.loadAudio("hhrraaa", "hhrraaa", this.panicSounds);
+    this.loadAudio("huh-aargh", "huh-aargh", this.panicSounds);
     // Angry sounds
     this.loadAudio("begonefoulbeast", "begonefoulbeast", this.angrySounds);
     // Bush sounds
@@ -78,6 +90,33 @@ export class GameScene extends Phaser.Scene {
     this.loadAudio("huhhee", "huhhee", this.happySounds);
     this.loadAudio("jeei", "jeei", this.happySounds);
     this.loadAudio("letshaveanother", "letshaveanother", this.happySounds);
+    this.loadAudio("yippee-woo", "yippee-woo", this.happySounds);
+    this.loadAudio("wuhhuu-yeah", "wuhhuu-yeah", this.happySounds);
+    this.loadAudio("niceshirt", "niceshirt", this.happySounds);
+    this.loadAudio("itspartytime", "itspartytime", this.happySounds);
+    this.loadAudio("bestpartyevarr", "bestpartyevarr", this.happySounds);
+    this.loadAudio("lookatthesemoves", "lookatthesemoves", this.happySounds);
+    this.loadAudio("imgonnadance", "imgonnadance", this.happySounds);
+    // Tinkle Mingle
+    this.loadAudio("heyheydidyouhear", "heyheydidyouhear", this.tinkleMingleSounds);
+    this.loadAudio("didyouseethatguard", "didyouseethatguard", this.tinkleMingleSounds);
+    this.loadAudio("werewolfstories", "werewolfstories", this.tinkleMingleSounds);
+    this.loadAudio("bobbybrewers", "bobbybrewers", this.tinkleMingleSounds);
+    this.loadAudio("iheardthisyear", "iheardthisyear", this.tinkleMingleSounds);
+    this.loadAudio("mingle1", "mingle1", this.tinkleMingleSounds);
+    this.loadAudio("mingle2", "mingle2", this.tinkleMingleSounds);
+    this.loadAudio("mingle3", "mingle3", this.tinkleMingleSounds);
+    this.loadAudio("mingle4", "mingle4", this.tinkleMingleSounds);
+    // Death Sounds
+    this.loadAudio("urgh", "urgh", this.deathSounds);
+    this.loadAudio("aarrgghh", "aarrgghh", this.deathSounds);
+    this.loadAudio("argh1", "argh1", this.deathSounds);
+    this.loadAudio("haargh", "haargh", this.deathSounds);
+    this.loadAudio("hnng-argh", "hnng-argh", this.deathSounds);
+    this.loadAudio("death1", "death1", this.deathSounds);
+    this.loadAudio("death2", "death2", this.deathSounds);
+    this.loadAudio("death3", "death3", this.deathSounds);
+    this.loadAudio("death4", "death4", this.deathSounds);
 
     this.load.spritesheet("player_front_idle", "assets/images/player/front_idle_64x64.png", {
       frameHeight: 64,
@@ -179,7 +218,7 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.guards, this.level.buildingLayer);
     this.physics.add.overlap(this.peasants, this.player);
     // Remove if people tend to get stuck
-    // this.physics.add.collider(this.peasants, this.peasants);
+    this.physics.add.collider(this.peasants, this.peasants);
     this.physics.add.collider(this.guards, this.peasants);
     this.physics.add.collider(this.guards, this.guards);
 
@@ -187,22 +226,13 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, this.level.getWidth(), this.level.getHeight());
     this.physics.world.setBounds(0, 0, this.level.getWidth(), this.level.getHeight());
     this.sound.add("music");
-    this.sound.play("music", { loop: true, volume: 0.3 });
+    this.sound.play("music", { loop: true, volume: 0.1 });
 
-    for (let i = 0; i < 2; i++) {
-      const peasant = new Peasant(this, 500 + i, 500 + i);
-      this.peasants.add(peasant);
-      this.add.existing(peasant);
-      this.physics.world.enable(peasant);
-      peasant.create();
-    }
-
-    for (let i = 0; i < 1; i++) {
-      const guard = new Guard(this, 1600 + i, 600 + i);
-      this.guards.add(guard);
-      this.add.existing(guard);
-      this.physics.world.enable(guard);
-      guard.create();
+    for (let i = 0; i < 5; i++) {
+      const guardSpawn = this.level.buildingLayer.getTileAt(58, 32, true);
+      eventManager.emit(Events.SPAWN_GUARD, this, {
+        location: new Vector2(guardSpawn.getCenterX(), guardSpawn.getCenterY()),
+      });
     }
 
     eventManager.on(Events.GAME_OVER, () => {
@@ -237,5 +267,6 @@ export class GameScene extends Phaser.Scene {
     this.peasants.children.each((peasant) => peasant.update(time, delta));
     this.guards.children.each((guard) => guard.update());
     this.ui.update(delta);
+    this.level.update(delta);
   }
 }

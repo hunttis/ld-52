@@ -110,4 +110,10 @@ const stateActions = (guard: Guard): { [state in GuardState]: () => void } => ({
   [GuardState.WEREWOLF_SEEN]: () => guard.werewolfSeen(),
 });
 
-eventManager.on(Events.SPAWN_GUARD, (game, { location }) => {});
+eventManager.on(Events.SPAWN_GUARD, (game, { location: { x, y } }) => {
+  const guard = new Guard(game, x, y);
+  game.guards.add(guard);
+  game.add.existing(guard);
+  game.physics.world.enable(guard);
+  guard.create();
+});
