@@ -30,7 +30,8 @@ export class Guard extends Phaser.Physics.Arcade.Sprite {
   }
 
   create() {
-    this.body.setCircle(TILE_SIZE / 4);
+    this.body.setOffset(TILE_SIZE / 3, TILE_SIZE / 3);
+    this.body.setCircle(TILE_SIZE / 6);
     this.body.pushable = false;
     this.refreshBody();
     this.setCollideWorldBounds(true);
@@ -47,13 +48,13 @@ export class Guard extends Phaser.Physics.Arcade.Sprite {
   }
 
   getSoundParams(): Phaser.Types.Sound.SoundConfig {
-    const detuneCount = Between(-400, 400);
+    const detune = Between(-300, 300);
     const distance = Clamp(Distance.BetweenPoints(this, this.parentScene.player), 0, 1000);
+    const volume = Clamp(1 - distance / 1000, 0.1, 1);
     const playerPos = this.parentScene.player.body.position;
-    let soundVector = new Vector2(this.x - playerPos.x, this.y - playerPos.y);
-    soundVector = soundVector.normalize();
-
-    return { detune: detuneCount, volume: Clamp(1 - distance / 1000, 0.1, 1), pan: soundVector.x };
+    const soundVector = new Vector2(this.x - playerPos.x, this.y - playerPos.y);
+    const pan = soundVector.normalize().x;
+    return { detune, volume, pan };
   }
 
   patrol() {
@@ -71,7 +72,7 @@ export class Guard extends Phaser.Physics.Arcade.Sprite {
     const closeEnough = Distance.BetweenPoints(this, player) < this.losDistance;
 
     if (hit && closeEnough) {
-      const sound = this.parentScene.panicSounds[Between(0, this.parentScene.panicSounds.length - 1)];
+      const sound = this.parentScene.angrySounds[Between(0, this.parentScene.angrySounds.length - 1)];
       this.parentScene.sound.play(sound, this.getSoundParams());
       this.currentState = GuardState.WEREWOLF_SEEN;
     }
@@ -108,12 +109,11 @@ export class Guard extends Phaser.Physics.Arcade.Sprite {
     }
 
     const { level, physics } = this.parentScene;
-    const target = level.buildingLayer
-      .tileToWorldXY(nextNode.x, nextNode.y)
-      .add(new Phaser.Math.Vector2(TILE_SIZE / 2));
-    physics.moveTo(this, target.x, target.y, this.speed);
+    const targetTile = level.buildingLayer.getTileAt(nextNode.x, nextNode.y, true);
+    const targetPoint = { x: targetTile.getCenterX(), y: targetTile.getCenterY() };
+    physics.moveTo(this, targetPoint.x, targetPoint.y, this.speed);
 
-    if (Distance.BetweenPoints(this.getCenter(), target) < TILE_SIZE / 2) this.path.shift();
+    if (Distance.BetweenPoints(this.getCenter(), targetPoint) < TILE_SIZE) this.path.shift();
     return false;
   }
 }

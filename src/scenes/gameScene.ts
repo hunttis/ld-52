@@ -203,7 +203,7 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.guards, this.peasants);
     this.physics.add.collider(this.guards, this.guards);
 
-    this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
+    this.cameras.main.startFollow(this.cameraTarget, true, 0.05, 0.05);
     this.cameras.main.setBounds(0, 0, this.level.getWidth(), this.level.getHeight());
     this.physics.world.setBounds(0, 0, this.level.getWidth(), this.level.getHeight());
     this.sound.add("music");

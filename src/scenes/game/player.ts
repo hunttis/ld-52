@@ -12,7 +12,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   arrow!: Phaser.GameObjects.Sprite;
   shadow!: Phaser.GameObjects.Sprite;
 
-  SPEED: number = 30;
+  SPEED: number = 600;
   KILL_RANGE: number = 32;
   POUNCE_RANGE: number = 200;
   POUNCE_SPEED: number = 500;
@@ -30,36 +30,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.cursors = this.parentScene.input.keyboard.createCursorKeys();
     this.cameraTarget = cameraTarget;
     this.cameraTarget.visible = false;
-    this.anims.create({
-      key: "player_front_idle",
-      frames: "player_front_idle",
-      frameRate: 60,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "player_front_walk",
-      frames: "player_front_walk",
-      frameRate: 60,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "player_back_walk",
-      frames: "player_back_walk",
-      frameRate: 60,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "player_side_walk",
-      frames: "player_side_walk",
-      frameRate: 60,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "player_side_idle",
-      frames: "player_side_idle",
-      frameRate: 60,
-      repeat: -1,
-    });
+    this.anims.create({ key: "player_front_idle", frames: "player_front_idle", frameRate: 60, repeat: -1, yoyo: true });
+    this.anims.create({ key: "player_side_idle", frames: "player_side_idle", frameRate: 60, repeat: -1, yoyo: true });
+    this.anims.create({ key: "player_front_walk", frames: "player_front_walk", frameRate: 60, repeat: -1 });
+    this.anims.create({ key: "player_back_walk", frames: "player_back_walk", frameRate: 60, repeat: -1 });
+    this.anims.create({ key: "player_side_walk", frames: "player_side_walk", frameRate: 60, repeat: -1 });
     this.setDepth(10);
   }
 
@@ -87,51 +62,54 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
+    const {
+      left: { isDown: left },
+      right: { isDown: right },
+      up: { isDown: up },
+      down: { isDown: down },
+    } = this.cursors;
+
     let direction = "none";
     let isMoving = false;
     if (this.controllable) {
-      if (this.cursors.left.isDown) {
-        this.setVelocityX(-this.SPEED * delta);
+      if (left) {
         this.anims.play("player_side_walk", true);
         this.flipX = true;
         isMoving = true;
         direction = "left";
-      } else if (this.cursors.right.isDown) {
-        this.setVelocityX(this.SPEED * delta);
+      } else if (right) {
         this.anims.play("player_side_walk", true);
         this.flipX = false;
         isMoving = true;
         direction = "right";
-      } else {
-        this.setVelocityX(0);
       }
 
-      let animation = "player_back_walk";
-      if (this.cursors.up.isDown) {
-        if (isMoving) {
-          animation = "player_side_walk";
-        }
-        this.setVelocityY(-this.SPEED * delta);
-        this.anims.play(animation, true);
+      if (up) {
+        this.anims.play(isMoving ? "player_side_walk" : "player_back_walk", true);
         isMoving = true;
-      } else if (this.cursors.down.isDown) {
-        animation = "player_front_walk";
-        if (isMoving) {
-          animation = "player_side_walk";
-        }
-        this.setVelocityY(this.SPEED * delta);
-        this.anims.play(animation, true);
+      } else if (down) {
+        this.anims.play(isMoving ? "player_side_walk" : "player_front_walk", true);
         isMoving = true;
-      } else {
-        this.setVelocityY(0);
       }
+
+      this.parentScene.physics.moveTo(
+        this,
+        this.x + (left ? -1 : right ? 1 : 0),
+        this.y + (up ? -1 : down ? 1 : 0),
+        this.SPEED
+      );
 
       if (!isMoving) {
-        this.anims.play("player_front_idle", true);
+        this.setVelocity(0);
+        if (direction === "left" || direction === "right") {
+          this.anims.play("player_side_idle", true);
+        } else {
+          this.anims.play("player_front_idle", true);
+        }
       }
     }
 
-    this.cameraTarget.setPosition(this.x + this.body.velocity.x / 2, this.y + this.body.velocity.y / 2);
+    this.cameraTarget.setPosition(this.x + this.body.velocity.x * 0.75, this.y + this.body.velocity.y * 0.75);
 
     this.parentScene.peasants.children.each((peasant) => {
       const distance = Phaser.Math.Distance.BetweenPoints(this, peasant.body.position);
