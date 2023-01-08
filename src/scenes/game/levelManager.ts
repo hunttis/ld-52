@@ -1,31 +1,41 @@
 import { GameScene } from "../gameScene";
 import * as EasyStar from "easystarjs";
+import { Peasant } from "./peasant";
+import { eventManager, Events } from "./eventsManager";
 
 export enum LayerName {
   BUILDINGS = "buildings",
   BUSHES = "bushes",
   HIDING_PLACES = "hidingplaces",
   GROUND = "ground",
+  ALARM = "alarm",
+  PEASANT = "peasants",
 }
 
 export enum SpriteName {
   BUSH = "bush",
   HIDING_PLACE = "hidingplace",
+  ALARM_BELL = "alarm",
 }
 
 export class LevelManager extends Phaser.GameObjects.Group {
   parentScene: GameScene;
   groundLayer: Phaser.Tilemaps.TilemapLayer;
   buildingLayer: Phaser.Tilemaps.TilemapLayer;
+  alarms!: Phaser.GameObjects.Group;
   bushes!: Phaser.GameObjects.Group;
   hidingPlaces!: Phaser.GameObjects.Group;
   easyStar: EasyStar.js;
+
+  static readonly GUARD_SPAWN_TIMER_MAX: number = 30_000;
+  guardSpawnTimer: number = 0;
 
   constructor(parent: GameScene) {
     super(parent);
     this.parentScene = parent;
     this.bushes = new Phaser.GameObjects.Group(this.parentScene);
     this.hidingPlaces = new Phaser.GameObjects.Group(this.parentScene);
+    this.alarms = new Phaser.GameObjects.Group(this.parentScene);
     this.easyStar = new EasyStar.js();
 
     const map = this.parentScene.make.tilemap({ key: "level0" });
@@ -36,7 +46,7 @@ export class LevelManager extends Phaser.GameObjects.Group {
 
     this.buildingLayer = map.createLayer(LayerName.BUILDINGS, "tilesheet", 0, 0);
 
-    this.buildingLayer.setCollisionBetween(1, 66);
+    this.buildingLayer.setCollisionBetween(1, 999);
     this.buildingLayer.setVisible(true);
 
     this.createMapSprites(map);
@@ -59,6 +69,21 @@ export class LevelManager extends Phaser.GameObjects.Group {
             this.hidingPlaces.add(hidingPlace);
           }
         });
+      } else if (layer.name === LayerName.ALARM) {
+        layer.objects.forEach((obj) => {
+          if (obj.x && obj.y) {
+            const alarmBell = this.parentScene.add.sprite(obj.x, obj.y, SpriteName.ALARM_BELL);
+            this.alarms.add(alarmBell);
+          }
+        });
+      } else if (layer.name === LayerName.PEASANT) {
+        layer.objects.forEach((obj) => {
+          const peasant = new Peasant(this.parentScene, obj.x ?? 0, obj.y ?? 0);
+          this.parentScene.peasants.add(peasant);
+          this.parentScene.add.existing(peasant);
+          this.parentScene.physics.world.enable(peasant);
+          peasant.create();
+        });
       }
     });
   }
@@ -74,6 +99,17 @@ export class LevelManager extends Phaser.GameObjects.Group {
 
   create() {
     console.log("Creating!");
+  }
+
+  update(delta: number) {
+    this.guardSpawnTimer += delta;
+    if (this.guardSpawnTimer > LevelManager.GUARD_SPAWN_TIMER_MAX) {
+      this.guardSpawnTimer -= LevelManager.GUARD_SPAWN_TIMER_MAX;
+      const guardSpawnTile = this.buildingLayer.getTileAt(58, 32);
+      eventManager.emit(Events.SPAWN_GUARD, this.parentScene, {
+        location: new Phaser.Math.Vector2(guardSpawnTile.getCenterX(), guardSpawnTile.getCenterY()),
+      });
+    }
   }
 
   getWidth() {

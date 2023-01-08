@@ -1,5 +1,7 @@
 import { GameScene } from "./scenes/gameScene";
 import { MenuScene } from "./scenes/menuScene";
+import { GameOverScene } from "./scenes/gameOverScene";
+import { GameWinScene } from "./scenes/gameWinScene";
 import "vite/types/importMeta.d"; // Not needed when not using TypeScript
 
 const hotReload = true;
@@ -15,9 +17,12 @@ export function startGame() {
     },
     physics: {
       default: "arcade",
+      arcade: {
+        debug: true,
+      },
     },
     parent: "game",
-    scene: [GameScene, MenuScene],
+    scene: [GameScene, MenuScene, GameOverScene, GameWinScene],
   };
 
   return new Phaser.Game(config);

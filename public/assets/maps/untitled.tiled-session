@@ -7,6 +7,7 @@
     "expandedProjectPaths": [
         "."
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "": {
             "scaleInDock": 1
@@ -15,8 +16,8 @@
             "scale": 0.1799,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 4585.881045025015,
-                "y": 3390.7726514730402
+                "x": 3702.0566981656484,
+                "y": 2732.0733740967207
             }
         },
         "level0.json#placeholder": {
@@ -30,7 +31,7 @@
             "selectedLayer": 0,
             "viewCenter": {
                 "x": 960,
-                "y": 622.8571428571429
+                "y": 624.2857142857144
             }
         },
         "level0.tmx#placeholder": {

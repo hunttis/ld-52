@@ -9,7 +9,9 @@ export class MenuScene extends Phaser.Scene {
     super({ key: "MenuScene" });
   }
 
-  preload() {}
+  preload() {
+    this.load.audio("menumusic", "assets/audio/Alku.mp3");
+  }
 
   create() {
     const horizontalCenter = this.cameras.main.width / 2;
@@ -35,6 +37,7 @@ export class MenuScene extends Phaser.Scene {
 
     var spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     spaceKey.on("down", () => this.startGame());
+    this.sound.play("menumusic", { loop: true });
   }
 
   createStyledText(text: string, xLoc: number, yLoc: number, style: Phaser.Types.GameObjects.Text.TextStyle) {
@@ -47,6 +50,7 @@ export class MenuScene extends Phaser.Scene {
   update(time: number, delta: number) {}
 
   startGame() {
+    this.sound.stopAll();
     this.scene.start("GameScene");
   }
 }

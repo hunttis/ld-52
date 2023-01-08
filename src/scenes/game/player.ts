@@ -8,14 +8,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   cameraTarget: CameraTarget;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   controllable: boolean = true;
+  gameOver: boolean = false;
+  canPounce: boolean = true;
+  arrow!: Phaser.GameObjects.Sprite;
+  shadow!: Phaser.GameObjects.Sprite;
 
   SPEED: number = 30;
-  KILL_RANGE: number = TILE_SIZE + 16;
+  KILL_RANGE: number = 32;
   POUNCE_RANGE: number = 200;
   POUNCE_SPEED: number = 500;
+  POUNCE_COOLDOWN: number = 1_000;
 
   nearestPeasantDistance: number = 100000;
-  nearestPeasant!: Peasant;
+  nearestPeasant?: Peasant;
 
   constructor(gameScene: GameScene, xLoc: number, yLoc: number, cameraTarget: CameraTarget) {
     super(gameScene, xLoc, yLoc, "null");
@@ -23,41 +28,106 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.parentScene = gameScene;
     this.cursors = this.parentScene.input.keyboard.createCursorKeys();
     this.cameraTarget = cameraTarget;
+    this.cameraTarget.visible = false;
     this.anims.create({
-      key: "player_walking",
-      frames: "player_walking",
+      key: "player_front_idle",
+      frames: "player_front_idle",
       frameRate: 60,
       repeat: -1,
     });
+    this.anims.create({
+      key: "player_front_walk",
+      frames: "player_front_walk",
+      frameRate: 60,
+      repeat: -1,
+    });
+    this.anims.create({
+      key: "player_back_walk",
+      frames: "player_front_walk",
+      frameRate: 60,
+      repeat: -1,
+    });
+    this.anims.create({
+      key: "player_side_walk",
+      frames: "player_side_walk",
+      frameRate: 60,
+      repeat: -1,
+    });
+    this.anims.create({
+      key: "player_side_idle",
+      frames: "player_side_idle",
+      frameRate: 60,
+      repeat: -1,
+    });
+    this.setDepth(10);
   }
 
   create() {
-    this.body.setCircle(TILE_SIZE / 2);
+    this.body.setOffset(TILE_SIZE * 0.1, TILE_SIZE * 0.25);
+    this.body.setCircle(TILE_SIZE * 0.4);
     this.refreshBody();
     this.setCollideWorldBounds(true);
     const attackKey = this.parentScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     attackKey.on("down", () => {
       this.attackNearest();
     });
-    this.anims.play("player_walking");
+    this.anims.play("player_front_idle");
+    this.arrow = this.parentScene.add.sprite(this.x, this.y, "arrow");
+    this.arrow.setOrigin(0, 0.5);
+    this.shadow = this.parentScene.add.sprite(this.x, this.y + 32, "shadow");
+    this.shadow.setOrigin(0.5);
+    this.shadow.setScale(0.5, 1);
   }
 
   update(delta: number) {
+    if (this.gameOver) {
+      console.log("player should be stopped");
+      this.stop();
+      this.body.stop();
+      return;
+    }
+
+    let direction = "none";
+    let isMoving = false;
     if (this.controllable) {
       if (this.cursors.left.isDown) {
         this.setVelocityX(-this.SPEED * delta);
+        this.anims.play("player_side_walk", true);
+        this.flipX = true;
+        isMoving = true;
+        direction = "left";
       } else if (this.cursors.right.isDown) {
         this.setVelocityX(this.SPEED * delta);
+        this.anims.play("player_side_walk", true);
+        this.flipX = false;
+        isMoving = true;
+        direction = "right";
       } else {
         this.setVelocityX(0);
       }
 
+      let animation = "player_back_walk";
       if (this.cursors.up.isDown) {
+        if (isMoving) {
+          animation = "player_side_walk";
+        }
         this.setVelocityY(-this.SPEED * delta);
+        this.anims.play(animation, true);
+        isMoving = true;
       } else if (this.cursors.down.isDown) {
+        animation = "player_front_walk";
+        if (isMoving) {
+          animation = "player_side_walk";
+        }
         this.setVelocityY(this.SPEED * delta);
+        this.anims.play(animation, true);
+        isMoving = true;
       } else {
         this.setVelocityY(0);
+      }
+
+      if (!isMoving) {
+        this.anims.play("player_front_idle", true);
       }
     }
 
@@ -74,35 +144,46 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
     });
 
-    if (this.nearestPeasantDistance < 150) {
+    if (this.nearestPeasantDistance < this.POUNCE_RANGE) {
       eventManager.emit(Events.KILL_NEAR, this.parentScene, {});
     }
 
-    if (!this.controllable) {
+    if (this.nearestPeasant && this.nearestPeasantDistance < this.POUNCE_RANGE) {
+      // show arrow + turn towards
+      this.arrow.setVisible(true);
+      this.arrow.setPosition(this.x, this.y);
+      this.arrow.rotation = Phaser.Math.Angle.BetweenPoints(this.arrow, this.nearestPeasant);
+      // this.parentScene.sound.play("growl");
+    } else {
+      this.arrow.setVisible(false);
+    }
+
+    if (!this.controllable && this.nearestPeasant) {
       this.parentScene.physics.moveToObject(this, this.nearestPeasant, this.POUNCE_SPEED);
 
-      if (Phaser.Math.Distance.BetweenPoints(this, this.nearestPeasant.body.position) < this.KILL_RANGE) {
+      if (Phaser.Math.Distance.BetweenPoints(this, this.nearestPeasant) < this.KILL_RANGE) {
         this.controllable = true;
-        const killPosition = new Phaser.Math.Vector2(
-          this.nearestPeasant.body.position.x,
-          this.nearestPeasant.body.position.y
-        );
-        eventManager.emit(Events.PEASANT_KILLED, this.parentScene, { location: killPosition });
-        this.parentScene.peasants.remove(this.nearestPeasant);
-        this.nearestPeasant.destroy();
-        this.nearestPeasantDistance = 100000;
+        this.nearestPeasant.die();
+        this.nearestPeasant = undefined;
+        this.nearestPeasantDistance = Infinity;
+        if (Math.random() > 0.5) {
+          this.parentScene.sound.play("chomp1");
+        } else {
+          this.parentScene.sound.play("chomp2");
+        }
+        setTimeout(() => (this.canPounce = true), this.POUNCE_COOLDOWN);
         console.log("KILL");
       }
     }
+    this.shadow.setPosition(this.x, this.y + 32);
   }
 
   attackNearest() {
-    if (!this.nearestPeasant) {
-      return;
-    }
+    if (!this.nearestPeasant || !this.canPounce) return;
     if (this.nearestPeasantDistance < this.POUNCE_RANGE) {
       this.controllable = false;
-      console.log("Going for the kill!");
+      this.canPounce = false;
+      setTimeout(() => (this.controllable = true), this.POUNCE_COOLDOWN);
     }
   }
 }
