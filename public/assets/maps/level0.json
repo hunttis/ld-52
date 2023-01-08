@@ -736,65 +736,6 @@
         }, 
         {
          "draworder":"topdown",
-         "id":3,
-         "name":"hidingplaces",
-         "objects":[
-                {
-                 "class":"",
-                 "gid":4,
-                 "height":64,
-                 "id":9,
-                 "name":"",
-                 "rotation":0,
-                 "visible":true,
-                 "width":64,
-                 "x":6821.86473429952,
-                 "y":611.710144927536
-                }, 
-                {
-                 "class":"",
-                 "gid":4,
-                 "height":64,
-                 "id":10,
-                 "name":"",
-                 "rotation":0,
-                 "visible":true,
-                 "width":64,
-                 "x":6852.05797101449,
-                 "y":4482.48309178744
-                }, 
-                {
-                 "class":"",
-                 "gid":4,
-                 "height":64,
-                 "id":11,
-                 "name":"",
-                 "rotation":0,
-                 "visible":true,
-                 "width":64,
-                 "x":686.599033816425,
-                 "y":4585.14009661836
-                }, 
-                {
-                 "class":"",
-                 "gid":4,
-                 "height":64,
-                 "id":12,
-                 "name":"",
-                 "rotation":0,
-                 "visible":true,
-                 "width":64,
-                 "x":650.367149758454,
-                 "y":744.56038647343
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "draworder":"topdown",
          "id":7,
          "name":"alarm",
          "objects":[
