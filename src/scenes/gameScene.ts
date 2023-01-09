@@ -156,7 +156,7 @@ export class GameScene extends Phaser.Scene {
     // init handlers
     pressEsc.on("down", () => {
       this.sound.stopAll();
-      eventManager.emit(Events.GAME_OVER, this, {});
+      eventManager.emit(Events.GAME_OVER, this, {reason: "debug"});
     });
 
     gotoMenu.on("down", () => {

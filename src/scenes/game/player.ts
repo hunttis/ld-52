@@ -1,6 +1,6 @@
 import {GameScene, TILE_SIZE} from "../gameScene";
 import {CameraTarget} from "./cameraTarget";
-import {Events, eventManager} from "./eventsManager";
+import {eventManager, Events} from "./eventsManager";
 import {Peasant} from "./peasant";
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
@@ -69,6 +69,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.shadow = this.parentScene.add.sprite(this.x, this.y + 32, "shadow");
         this.shadow.setOrigin(0.5);
         this.shadow.setScale(0.5, 1);
+
+        eventManager.on(Events.BELL_RUNG, ()=>{
+
+        });
     }
 
     getInputs(): { up: boolean, down: boolean, left: boolean, right: boolean } {
@@ -85,6 +89,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
             left: cLeft || this.left.isDown,
             right: cRight || this.right.isDown,
         }
+    }
+
+    yeet() {
+
     }
 
     update(delta: number) {

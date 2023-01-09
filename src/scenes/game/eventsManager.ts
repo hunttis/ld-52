@@ -8,7 +8,7 @@ export const eventManager = {
     phaserEventEmitter.on(event, callback),
 };
 
-export type GameOverReason = "cleric" | "bell";
+export type GameOverReason = "cleric" | "bell" | "debug";
 
 export type EventData = {
   [Events.KILL_NEAR]: {};

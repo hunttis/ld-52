@@ -1,5 +1,4 @@
 import {GameOverReason} from "src/scenes/game/eventsManager";
-import {GameScene} from "src/scenes/gameScene";
 
 export class GameOverScene extends Phaser.Scene {
     titleText!: Phaser.GameObjects.Text;
@@ -16,8 +15,19 @@ export class GameOverScene extends Phaser.Scene {
     preload() {
     }
 
-    init(data: { gameOverReason: GameOverReason }) {
-        this.gameOverReason = data.gameOverReason
+    init(data: { reason: GameOverReason }) {
+        this.gameOverReason = data.reason
+    }
+
+    getGameOverText(reason: GameOverReason): string {
+        switch (reason) {
+            case "cleric":
+                return "You died, killed by the clerics";
+            case "bell":
+                return "The villagers sounded the alarm and hunted you down with the clerics";
+            case "debug":
+                return "You found the super secret escape ending!"
+        }
     }
 
     create() {
@@ -34,10 +44,10 @@ export class GameOverScene extends Phaser.Scene {
         };
 
         this.titleText = this.createStyledText("The Feast is over...", horizontalCenter, 100, titleStyle);
+        const gameOverMessage = this.getGameOverText(this.gameOverReason);
+        console.log(gameOverMessage);
         this.instructionsText = this.createStyledText(
-            this.gameOverReason === "cleric"
-                ? "You died, killed by the clerics"
-                : "The villagers sounded the alarm and hunted you down with the clerics",
+            gameOverMessage,
             horizontalCenter,
             350,
             instructionStyle

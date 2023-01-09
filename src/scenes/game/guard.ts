@@ -83,7 +83,7 @@ export class Guard extends Phaser.Physics.Arcade.Sprite {
     const { physics, player } = this.parentScene;
     physics.moveTo(this, player.x, player.y, this.speed * this.runMultiplier);
     if (Distance.BetweenPoints(this, player) < TILE_SIZE) {
-      eventManager.emit(Events.GAME_OVER, this.parentScene, {});
+      eventManager.emit(Events.GAME_OVER, this.parentScene, {reason: "cleric"});
     } else if (Distance.BetweenPoints(this, player) > TILE_SIZE * 12) {
       this.currentState = GuardState.PATROLLING;
     }
