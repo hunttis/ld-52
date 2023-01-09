@@ -8,10 +8,12 @@ export const eventManager = {
     phaserEventEmitter.on(event, callback),
 };
 
+export type GameOverReason = "cleric" | "bell";
+
 export type EventData = {
   [Events.KILL_NEAR]: {};
   [Events.PEASANT_KILLED]: { location: Phaser.Math.Vector2; gender: Gender };
-  [Events.GAME_OVER]: {};
+  [Events.GAME_OVER]: {reason: GameOverReason};
   [Events.GAME_WON]: {};
   [Events.BELL_RUNG]: {};
   [Events.SPAWN_GUARD]: { location: Phaser.Math.Vector2 };

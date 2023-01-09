@@ -177,6 +177,7 @@ export class GameScene extends Phaser.Scene {
 
   create() {
     this.gameOver = false;
+    this.bellRinging = false;
     const muteButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
     muteButton.on("down", () => (this.sound.mute = !this.sound.mute));
 
@@ -217,12 +218,12 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
-    eventManager.on(Events.GAME_OVER, () => {
+    eventManager.on(Events.GAME_OVER, (_game, gameOverReason) => {
       if (this.gameOver) return;
       this.gameOver = true;
       setTimeout(() => {
         this.sound.stopAll();
-        this.scene.start("GameOverScene");
+        this.scene.start("GameOverScene", gameOverReason);
       }, 5_000);
     });
 
@@ -236,11 +237,12 @@ export class GameScene extends Phaser.Scene {
     });
 
     eventManager.on(Events.BELL_RUNG, (_game) => {
+      console.log(this.bellRinging)
       if (!this.bellRinging) {
-        this.sound.play("bell_ring");
+        this.sound.play("bell_ring", {volume: 1.5});
         this.bellRinging = true;
       }
-      eventManager.emit(Events.GAME_OVER, this, {});
+      eventManager.emit(Events.GAME_OVER, this, {reason: "bell"});
     });
 
     this.ui = new Ui(this);

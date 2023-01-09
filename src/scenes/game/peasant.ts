@@ -120,7 +120,8 @@ export class Peasant extends Phaser.Physics.Arcade.Sprite {
     this.refreshBody();
     this.setCollideWorldBounds(true);
     this.panicIndicator = this.parentScene.add.sprite(this.x, this.y, "peasant_panic");
-    this.panicIndicator.setOrigin(0, 0.5);
+    this.panicIndicator.setScale(2);
+    this.panicIndicator.setOrigin(0.4, 0.7);
     this.panicIndicator.setVisible(false);
     this.debugLos = this.parentScene.add.graphics({ lineStyle: { color: 0xff0055 } });
     this.anims.create({ key: "peasant_man_walk", frames: "peasant_man_walk", frameRate: 60, repeat: -1 });
