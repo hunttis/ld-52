@@ -209,7 +209,7 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, this.level.getWidth(), this.level.getHeight());
     this.physics.world.setBounds(0, 0, this.level.getWidth(), this.level.getHeight());
     this.sound.add("music");
-    this.sound.play("music", { loop: true, volume: 0.1 });
+    this.sound.play("music", { loop: true, volume: 0.3 });
 
     for (let i = 0; i < 5; i++) {
       const guardSpawn = this.level.buildingLayer.getTileAt(58, 32, true);
@@ -237,12 +237,12 @@ export class GameScene extends Phaser.Scene {
     });
 
     eventManager.on(Events.BELL_RUNG, (_game) => {
-      console.log(this.bellRinging)
+      console.log(this.bellRinging);
       if (!this.bellRinging) {
-        this.sound.play("bell_ring", {volume: 1.5});
+        this.sound.play("bell_ring", { volume: 1.5 });
         this.bellRinging = true;
       }
-      eventManager.emit(Events.GAME_OVER, this, {reason: "bell"});
+      eventManager.emit(Events.GAME_OVER, this, { reason: "bell" });
     });
 
     this.ui = new Ui(this);
